@@ -17,8 +17,8 @@ namespace Cedar { namespace Doubles {
         virtual NSString * value_string() const;
         virtual size_t value_size() const;
 
-        virtual bool matches_encoding(const char * expected_argument_encoding) const;
-        virtual bool matches_bytes(void * expected_argument_bytes) const;
+        virtual bool matches_encoding(const char * actual_argument_encoding) const;
+        virtual bool matches_bytes(void * actual_argument_bytes) const;
 
     private:
         const T value_;
@@ -52,14 +52,14 @@ namespace Cedar { namespace Doubles {
     }
 
     template<typename T>
-    /* virtual */ bool TypedArgument<T>::matches_encoding(const char * expected_argument_encoding) const {
-        return (0 == strncmp(@encode(T), "@", 1) && 0 == strncmp(expected_argument_encoding, "@", 1)) ||
-        (0 != strncmp(@encode(T), "@", 1) && 0 != strncmp(expected_argument_encoding, "@", 1));
+    /* virtual */ bool TypedArgument<T>::matches_encoding(const char * actual_argument_encoding) const {
+        return (0 == strncmp(@encode(T), "@", 1) && 0 == strncmp(actual_argument_encoding, "@", 1)) ||
+        (0 != strncmp(@encode(T), "@", 1) && 0 != strncmp(actual_argument_encoding, "@", 1));
     }
 
     template<typename T>
-    /* virtual */ bool TypedArgument<T>::matches_bytes(void * expected_argument_bytes) const {
-        return Matchers::Comparators::compare_equal(value_, *(static_cast<T *>(expected_argument_bytes)));
+    /* virtual */ bool TypedArgument<T>::matches_bytes(void * actual_argument_bytes) const {
+        return Matchers::Comparators::compare_equal(value_, *(static_cast<T *>(actual_argument_bytes)));
     }
 
 }}

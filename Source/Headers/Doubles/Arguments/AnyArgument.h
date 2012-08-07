@@ -16,8 +16,8 @@ namespace Cedar { namespace Doubles {
         virtual NSString * value_string() const { return @"anything"; };
         virtual size_t value_size() const { return 0; };
 
-        virtual bool matches_encoding(const char * expected_argument_encoding) const { return true; }
-        virtual bool matches_bytes(void * expected_argument_bytes) const { return true; }
+        virtual bool matches_encoding(const char * actual_argument_encoding) const { return true; }
+        virtual bool matches_bytes(void * actual_argument_bytes) const { return true; }
 
     };
 
