@@ -33,4 +33,7 @@
     [[NSException exceptionWithName:NSInternalInconsistencyException reason:@"wibble" userInfo:nil] raise];
 }
 
+- (void)methodWithBlock:(void(^)())blockArgument {
+}
+
 @end

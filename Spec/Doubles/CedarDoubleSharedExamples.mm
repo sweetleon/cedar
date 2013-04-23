@@ -40,6 +40,35 @@ sharedExamplesFor(@"a Cedar double", ^(NSDictionary *sharedContext) {
         });
     });
 
+
+
+    context(@"when recording an invocation", ^{
+        it(@"should not retain the double", ^{
+            myDouble stub_method("value");
+
+            int doubleRetainCount = myDouble.retainCount;
+
+            @autoreleasepool {
+                [myDouble value];
+                // spies are allowed to increment the retain count of the double by 1
+                // but should hand the retain over to the autorelease pool
+                myDouble.retainCount should be_less_than_or_equal_to(doubleRetainCount + 1);
+            }
+
+            myDouble.retainCount should equal(doubleRetainCount);
+        });
+
+        it(@"should copy block arguments", ^{
+            void(^aBlock)() = ^{ };
+            spy_on(aBlock);
+
+            myDouble stub_method("methodWithBlock:");
+            [myDouble methodWithBlock:aBlock];
+
+            aBlock should have_received(@selector(copy));
+        });
+    });
+
     describe(@"#stub_method", ^{
         context(@"with a non-double", ^{
             it(@"should raise an exception", ^{
