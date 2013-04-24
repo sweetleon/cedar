@@ -58,7 +58,7 @@ sharedExamplesFor(@"a Cedar double", ^(NSDictionary *sharedContext) {
             myDouble.retainCount should equal(doubleRetainCount);
         });
 
-        it(@"should exchange block arguments on the invocation with copies that can be later invoked", ^{
+        it(@"should exchange block arguments on the invocation with copies that can later be invoked", ^{
             __block BOOL blockWasCalled = NO;
 
             myDouble stub_method("methodWithBlock:");
@@ -77,6 +77,22 @@ sharedExamplesFor(@"a Cedar double", ^(NSDictionary *sharedContext) {
 
             retrievedBlock();
             blockWasCalled should be_truthy;
+        });
+
+        it(@"should exchange c-string arguments on the invocation with copies that can later be accessed", ^{
+            char *string = (char *)malloc(6);
+            strcpy(string, "hello");
+
+            myDouble stub_method("methodWithCString:");
+
+            [myDouble methodWithCString:string];
+            strcpy(string, "byeby");
+
+            NSInvocation *invocation = [[myDouble sent_messages] lastObject];
+            char *argument = NULL;
+            [invocation getArgument:&argument atIndex:2];
+
+            strncmp(argument, "hello", 6) should equal(0);
         });
     });
 

@@ -1,6 +1,26 @@
 #import "NSInvocation+Cedar.h"
 #import <objc/runtime.h>
 
+@interface StringHolder: NSObject {
+    char *_cString;
+}
+- (id)initWithCString:(char *)cString;
+@end
+
+@implementation StringHolder
+- (void)dealloc {
+    free(_cString);
+    [super dealloc];
+}
+
+- (id)initWithCString:(char *)cString {
+    if (self = [super init]) {
+        _cString = cString;
+    }
+    return self;
+}
+@end
+
 @implementation NSInvocation (Cedar)
 
 - (void)retainMethodArgumentsAndCopyBlocks {
@@ -10,16 +30,24 @@
 
     for (NSUInteger argumentIndex = 2; argumentIndex < numberOfArguments; ++ argumentIndex) {
         const char *encoding = [methodSignature getArgumentTypeAtIndex:argumentIndex];
-        id argument = nil;
+        void *argument = nil;
         [self getArgument:&argument atIndex:argumentIndex];
-        if (strlen(encoding) == 2 && strncasecmp("@?", encoding, 2) == 0) {
-            argument = [argument copy];
-            [retainedArguments addObject:argument];
-            [argument release];
-            [self setArgument:&argument atIndex:argumentIndex];
-        } else if (encoding[0] == '@') {
-            if (argument) {
-                [retainedArguments addObject:argument];
+        if (argument) {
+            if (strlen(encoding) == 2 && strncasecmp("@?", encoding, 2) == 0) {
+                argument = [(id)argument copy];
+                [retainedArguments addObject:(id)argument];
+                [(id)argument release];
+                [self setArgument:&argument atIndex:argumentIndex];
+            } else if (encoding[0] == '@') {
+                [retainedArguments addObject:(id)argument];
+            } else if (encoding[0] == '*') {
+                size_t stringLength = strlen(argument);
+                char *copiedArgument = malloc(stringLength);
+                strcpy(copiedArgument, argument);
+                [self setArgument:&copiedArgument atIndex:argumentIndex];
+                StringHolder *stringHolder = [[StringHolder alloc] initWithCString:argument];
+                [retainedArguments addObject:stringHolder];
+                [stringHolder release];
             }
         }
     }

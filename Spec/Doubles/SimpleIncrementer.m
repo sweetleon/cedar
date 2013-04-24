@@ -36,4 +36,9 @@
 - (void)methodWithBlock:(void(^)())blockArgument {
 }
 
+- (void)methodWithCString:(char *)string
+{
+
+}
+
 @end
