@@ -58,14 +58,25 @@ sharedExamplesFor(@"a Cedar double", ^(NSDictionary *sharedContext) {
             myDouble.retainCount should equal(doubleRetainCount);
         });
 
-        it(@"should copy block arguments", ^{
-            void(^aBlock)() = ^{ };
-            spy_on(aBlock);
+        it(@"should exchange block arguments on the invocation with copies that can be later invoked", ^{
+            __block BOOL blockWasCalled = NO;
 
             myDouble stub_method("methodWithBlock:");
-            [myDouble methodWithBlock:aBlock];
 
-            aBlock should have_received(@selector(copy));
+            ^{
+                void(^originalBlock)() = ^{
+                    blockWasCalled = YES;
+                };
+                [myDouble methodWithBlock:originalBlock];
+            }();
+
+            NSInvocation *invocationWithBlock = [[myDouble sent_messages] lastObject];
+            void(^retrievedBlock)() = nil;
+
+            [invocationWithBlock getArgument:&retrievedBlock atIndex:2];
+
+            retrievedBlock();
+            blockWasCalled should be_truthy;
         });
     });
 

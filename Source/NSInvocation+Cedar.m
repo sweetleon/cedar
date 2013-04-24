@@ -13,7 +13,9 @@
         id argument = nil;
         [self getArgument:&argument atIndex:argumentIndex];
         if (strlen(encoding) == 2 && strncasecmp("@?", encoding, 2) == 0) {
-            [argument copy];
+            argument = [argument copy];
+            [retainedArguments addObject:argument];
+            [argument release];
             [self setArgument:&argument atIndex:argumentIndex];
         } else if (encoding[0] == '@') {
             if (argument) {
