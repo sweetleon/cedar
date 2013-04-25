@@ -58,8 +58,9 @@ sharedExamplesFor(@"a Cedar double", ^(NSDictionary *sharedContext) {
             myDouble.retainCount should equal(doubleRetainCount);
         });
 
-        it(@"should exchange block arguments on the invocation with copies that can later be invoked", ^{
+        it(@"should exchange any block arguments with copies that can later be invoked", ^{
             __block BOOL blockWasCalled = NO;
+            void *blockVariableLocationOnStack = &blockWasCalled;
 
             myDouble stub_method("methodWithBlock:");
 
@@ -75,11 +76,15 @@ sharedExamplesFor(@"a Cedar double", ^(NSDictionary *sharedContext) {
 
             [invocationWithBlock getArgument:&retrievedBlock atIndex:2];
 
+            //Blocks don't change memory address when copied but we can detect copying
+            //by observing when it's enclosed block variables are moved to the heap.
+            //See: http://www.cocoawithlove.com/2009/10/how-blocks-are-implemented-and.html
+            (void *)&blockWasCalled should_not equal(blockVariableLocationOnStack);
             retrievedBlock();
             blockWasCalled should be_truthy;
         });
 
-        it(@"should exchange c-string arguments on the invocation with copies that can later be accessed", ^{
+        it(@"should exchange any c-string arguments with copies that can later be accessed", ^{
             char *string = (char *)malloc(6);
             strcpy(string, "hello");
 
